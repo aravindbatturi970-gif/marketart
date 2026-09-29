@@ -34,7 +34,7 @@ The anon key is safe for the browser — all data access is protected by Row Lev
 
 ## Deploying to GitHub Pages
 
-This repo deploys automatically via **GitHub Actions** (`.github/workflows/deploy.yml`). One-time setup:
+This repo deploys automatically via **GitHub Actions** (`.github/workflows/deploy.yml`) on every push to `main`. One-time setup:
 
 1. **Create the GitHub repo** (e.g. `ArtSphereA-ZMarket`) and push:
 
@@ -47,7 +47,7 @@ This repo deploys automatically via **GitHub Actions** (`.github/workflows/deplo
    git push -u origin main
    ```
 
-   If your repo has a different name, update `GH_PAGES_BASE` in `vite.config.ts` to `/<repo-name>/`.
+   Any repo name works — the build is path-agnostic; nothing to configure.
 
 2. **Enable Pages from Actions:** repo **Settings → Pages → Build and deployment → Source: GitHub Actions**.
 
@@ -57,10 +57,14 @@ This repo deploys automatically via **GitHub Actions** (`.github/workflows/deplo
 
 ### How Pages support works
 
-- `vite.config.ts` — `base` switches to `/ArtSphereA-ZMarket/` only when `GITHUB_PAGES=1`; local dev stays at `/`
-- `main.tsx` — `BrowserRouter basename={import.meta.env.BASE_URL}` follows the same base
-- `scripts/build-pages.mjs` — `npm run build:pages` builds with the Pages base, copies `index.html` → `404.html` (so SPA deep links like `/artwork/:id` survive hard refresh) and writes `.nojekyll`
+The deployment is **path-agnostic** — it cannot white-screen over a wrong repo name:
+
+- `vite.config.ts` — `base: "./"` emits **relative** asset URLs, so the bundle loads from any directory (repo subpath or domain root)
+- `main.tsx` — `HashRouter` keeps all routing relative to `index.html`; deep links like `/artwork/:id` are encoded in the URL fragment and survive hard refresh
+- `scripts/build-pages.mjs` — `npm run build:pages` builds, copies `index.html` → `404.html` (GitHub serves it for unknown paths and the app boots from there) and writes `.nojekyll`
 - Local test of the Pages bundle: `npm run build:pages && npm run preview`
+
+URLs use the `#/` form on Pages (e.g. `.../ArtSphereA-ZMarket/#/discover`) — the standard trade-off for host-anywhere SPAs.
 
 ## Scripts
 

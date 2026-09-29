@@ -7,14 +7,14 @@ import { fileURLToPath, URL } from "node:url";
 // a later stage can point it at the backend (API + database) without touching
 // application code.
 //
-// Base path: GitHub Pages serves project sites from
-// `https://<user>.github.io/ArtSphereA-ZMarket/`, so builds for Pages carry
-// that prefix (set GITHUB_PAGES=1 in CI). Local dev and normal builds stay
-// at the root — `npm run dev` is unaffected.
-const GH_PAGES_BASE = "/ArtSphereA-ZMarket/";
-
+// Base path: relative ("./") so the built app works from ANY directory —
+// the repo root on GitHub Pages (`/repo-name/`), a user site root (`/`),
+// or any subfolder — with zero per-repo configuration. Asset URLs are
+// emitted relative to index.html, which is what prevents the classic
+// GitHub Pages "white screen" from absolute-path 404s. The router uses
+// HashRouter for the same reason (see src/main.tsx).
 export default defineConfig({
-  base: process.env.GITHUB_PAGES === "1" ? GH_PAGES_BASE : "/",
+  base: "./",
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {

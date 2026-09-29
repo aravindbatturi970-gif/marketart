@@ -1,11 +1,11 @@
 /**
  * GitHub Pages production build.
  *
- * 1. Re-runs the normal typecheck + build with GITHUB_PAGES=1 so Vite
- *    emits assets under /ArtSphereA-ZMarket/ (see vite.config.ts).
+ * 1. Runs the normal typecheck + build. Vite emits RELATIVE asset paths
+ *    (base "./") and the app uses HashRouter, so the bundle works from any
+ *    directory — no repo-name coupling, no white-screen asset 404s.
  * 2. Copies index.html to 404.html — GitHub serves 404.html for unknown
- *    paths, which lets the SPA router handle deep links like /discover
- *    or /artwork/:id on hard refresh and direct navigation.
+ *    paths; the app boots there and HashRouter resolves the correct view.
  * 3. Writes .nojekyll so Pages serves files as-is (skips Jekyll processing).
  *
  * Usage: npm run build:pages
@@ -19,12 +19,11 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const dist = join(root, "dist");
 
 const npmCmd = process.platform === "win32" ? "npm.cmd" : "npm";
-console.log(`> Building for GitHub Pages (GITHUB_PAGES=1)...`);
+console.log("> Building for GitHub Pages (relative base + 404 fallback)...");
 const build = spawnSync(npmCmd, ["run", "build"], {
   cwd: root,
   stdio: "inherit",
   shell: process.platform === "win32",
-  env: { ...process.env, GITHUB_PAGES: "1" },
 });
 if (build.status !== 0) {
   process.exit(build.status ?? 1);
